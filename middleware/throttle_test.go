@@ -328,3 +328,7 @@ func BenchmarkThrottle(b *testing.B) {
 		handler.ServeHTTP(w, req)
 	}
 }
+
+func TestDefaultBacklogTimeout(t *testing.T) {
+	assertEqual(t, time.Second*60, DefaultBacklogTimeout())
+}

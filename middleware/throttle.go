@@ -149,3 +149,8 @@ func (t throttler) setRetryAfterHeaderIfNeeded(w http.ResponseWriter, ctxDone bo
 	}
 	w.Header().Set("Retry-After", strconv.Itoa(int(t.retryAfterFn(ctxDone).Seconds())))
 }
+
+// DefaultBacklogTimeout returns the default backlog timeout used by the Throttle middleware.
+func DefaultBacklogTimeout() time.Duration {
+	return defaultBacklogTimeout
+}
