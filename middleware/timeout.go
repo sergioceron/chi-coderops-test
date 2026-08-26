@@ -33,15 +33,17 @@ func Timeout(timeout time.Duration) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			ctx, cancel := context.WithTimeout(r.Context(), timeout)
+			ww := NewWrapResponseWriter(w, r.ProtoMajor)
 			defer func() {
 				cancel()
-				if ctx.Err() == context.DeadlineExceeded {
+				if ctx.Err() == context.DeadlineExceeded && ww.Status() == 0 && ww.BytesWritten() == 0 {
 					w.WriteHeader(http.StatusGatewayTimeout)
+					_, _ = w.Write([]byte(http.StatusText(http.StatusGatewayTimeout)))
 				}
 			}()
 
 			r = r.WithContext(ctx)
-			next.ServeHTTP(w, r)
+			next.ServeHTTP(ww, r)
 		}
 		return http.HandlerFunc(fn)
 	}
